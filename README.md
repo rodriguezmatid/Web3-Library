@@ -1,5 +1,7 @@
 # Web3-Library
-![Project banner with text: "Script with some commands of the Web3 Library."](img/header.png "Script with some commands of the Web3 Library.")
+<div align="center">
+<img src="img/header.png"/>
+</div>
 
 <div align="center">
 <img src="https://img.shields.io/github/stars/rodriguezmatid/Web3-Library?style=social" />
