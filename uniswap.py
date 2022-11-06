@@ -9,6 +9,7 @@ _dotenv.load_dotenv()
 ganache_url = "HTTP://127.0.0.1:7545"
 infura_url = os.environ["INFURA_URL"]
 web3 = Web3(Web3.HTTPProvider(infura_url))
+privateKey = os.environ['PRIVATE_KEY']
 
 # Log
 if web3.isConnected() == True:
@@ -53,7 +54,7 @@ swap = routerContract.functions.swapExactTokensForTokens(
           })
 
 # Sign transaction
-signed_tx = web3.eth.account.signTransaction(swap, private_key)
+signed_tx = web3.eth.account.signTransaction(swap, privateKey)
 
 # Send transaction
 send_tx = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
