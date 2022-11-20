@@ -42,13 +42,34 @@ IncentivesController = web3.toChecksumAddress('0xd784927Ff2f95ba542BfC824c8a8a98
 UiPoolDataProvider = web3.toChecksumAddress('0x30375522F67a6308630d49A694ca1491fA2D3BC6')
 UiIncentiveDataProvider = web3.toChecksumAddress('0xD01ab9a6577E1D84F142e44D49380e23A340387d')
 
+wethAddress = web3.toChecksumAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2')
+usdcAddress = web3.toChecksumAddress('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
+daiAddress = web3.toChecksumAddress('0x6B175474E89094C44Da98b954EedeAC495271d0F')
+
 contractProtocolDataProvider = web3.eth.contract(address = protocolDataProvider, abi = abi_protocolDataProvider)
 contractLendingPool = web3.eth.contract(address = lendingPool, abi = abi_lendingPool)
 contractLendingPoolAddressesProviderRegistry = web3.eth.contract(address = lendingPoolAddressesProviderRegistry, abi = abi_lendingPoolAddressesProviderRegistry)
 
-#token = contractProtocolDataProvider.functions.getAllReservesTokens().call()
-lending = contractLendingPoolAddressesProviderRegistry.functions.getAddressesProvidersList().call()
-#tokenBalance = contractProtocolDataProvider.functions.getReserveConfigurationData('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48').call()
-#tokenBalance1 = contractProtocolDataProvider.functions.getReserveData('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48').call()
-#tokenBalance1 = to
-print(lending)
+
+wethreserve = contractProtocolDataProvider.functions.getAllATokens().call()
+wethreserve2 = contractProtocolDataProvider.functions.getReserveData(wethAddress).call()
+
+#print(wethreserve)
+#print(wethreserve2)
+#print("# Tokens: " + f"{float(web3.fromWei(wethreserve2[0], 'ether'))* 5.58}")
+
+protocolDataProvider = contractProtocolDataProvider.functions.getReserveConfigurationData(usdcAddress).call()
+decimals = protocolDataProvider[0] # the decimals used by the reserve
+maxLtv = protocolDataProvider[1]/100 # represents the maximum borrowing power of a specific collateral. If a collateral has an LTV of 75%, the user can borrow up to 0.75 worth of ETH in the principal currency for every 1 ETH worth of collateral.
+liquidationThreshold = protocolDataProvider[2]/100 #  threshold at which a borrow position will be considered undercollateralized and subject to liquidation for each collateral
+liquidationPenalty = protocolDataProvider[3]/100 - 100 # bonus awarded to liquidators
+reserveFactor = protocolDataProvider[4]/100 # Reserve factor is a percentage of interest which goes to a collector contract that is controlled by Aave governance to promote ecosystem growth.
+
+print("Max LTV: ", maxLtv,"%")
+print("Liquidation threshold: ", liquidationThreshold,"%")
+print("Liquidation penalty: ", liquidationPenalty,"%")
+print("Reserve factor: ", reserveFactor, "%")
+
+
+
+
