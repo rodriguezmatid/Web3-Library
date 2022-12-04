@@ -65,11 +65,6 @@ IncentivesController = web3.toChecksumAddress('0xd784927Ff2f95ba542BfC824c8a8a98
 UiPoolDataProvider = web3.toChecksumAddress('0x30375522F67a6308630d49A694ca1491fA2D3BC6')
 UiIncentiveDataProvider = web3.toChecksumAddress('0xD01ab9a6577E1D84F142e44D49380e23A340387d')
 
-wethAddress = web3.toChecksumAddress('0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2')
-usdcAddress = web3.toChecksumAddress('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
-daiAddress = web3.toChecksumAddress('0x6B175474E89094C44Da98b954EedeAC495271d0F')
-uniAddress = web3.toChecksumAddress('0x1f9840a85d5af5bf1d1762f925bdaddc4201f984')
-
 contractProtocolDataProvider = web3.eth.contract(address = addressProtocolDataProvider, abi = abi_protocolDataProvider)
 contractLendingPool = web3.eth.contract(address = addressLendingPool, abi = abi_lendingPool)
 contractLendingPoolAddressesProviderRegistry = web3.eth.contract(address = addressLendingPoolAddressesProviderRegistry, abi = abi_lendingPoolAddressesProviderRegistry)
@@ -80,8 +75,9 @@ allTokens = contractProtocolDataProvider.functions.getAllReservesTokens().call()
 #################################################################  Total Protocol Pools ####################################################
 ############################################################################################################################################
 i = 0
-totalAvaiableLiquidity = 0
-totalDebt = 0
+totalAvaiableLiquidityUSD = 0
+totalBorrowedUSD = 0
+totalReserveUSD = 0
 for x in allTokens:
     tokenAddress = allTokens[i][1]
     tokenQuantity = contractProtocolDataProvider.functions.getReserveData(tokenAddress).call()
@@ -92,14 +88,20 @@ for x in allTokens:
     liquidationPenalty = protocolDataProvider[3]/100 - 100 # bonus awarded to liquidators
     reserveFactor = protocolDataProvider[4]/100 # Reserve factor is a percentage of interest which goes to a collector contract that is controlled by Aave governance to promote ecosystem growth.
     tokenPrice = float(web3.fromWei(contractPriceOracle.functions.getAssetPrice(allTokens[i][1]).call(), 'ether')) * ethPrice
-    avaiableLiquidity = round(web3.fromWei(tokenQuantity[0] * tokenPrice, 'ether'), 2)
-    stableDebt = round(web3.fromWei(tokenQuantity[1] * tokenPrice, 'ether'), 2)
-    variableDebt = round(web3.fromWei(tokenQuantity[2] * tokenPrice, 'ether'), 2)
-    tokenDebt = stableDebt + variableDebt
-    tokenReserve = tokenDebt + avaiableLiquidity
+    # Liquidity
+    avaiableLiquidity = tokenQuantity[0]/(10**decimals)
+    avaiableLiquidityUSD = avaiableLiquidity * tokenPrice
+    # Borrowed
+    tokenBorrowed = (tokenQuantity[1] + tokenQuantity[2])/(10**decimals)
+    tokenBorrowedUSD = tokenBorrowed * tokenPrice
+    # Reserve
+    tokenReserve = tokenBorrowed + avaiableLiquidity
+    tokenReserveUSD = tokenBorrowedUSD + avaiableLiquidityUSD
+    #utilizationRate = tokenBorrow/tokenReserve
 
-    totalAvaiableLiquidity = avaiableLiquidity + totalAvaiableLiquidity
-    totalDebt = tokenDebt + totalDebt
+    totalAvaiableLiquidityUSD = avaiableLiquidityUSD + totalAvaiableLiquidityUSD
+    totalBorrowedUSD = tokenBorrowedUSD + totalBorrowedUSD
+    totalReserveUSD = tokenReserveUSD + totalReserveUSD
 
     print("Asset #", i)
     print(allTokens[i][0])
@@ -109,31 +111,17 @@ for x in allTokens:
     print("Liquidation threshold: ", liquidationThreshold,"%")
     print("Liquidation penalty: ", liquidationPenalty,"%")
     print("Reserve factor: ", reserveFactor, "%")
-    print("Avaiable liquidity: ", avaiableLiquidity)
-    print(tokenDebt)
-    print(tokenReserve)
+    #print("Utilization rate: ", utilizationRate, "%")
+    print("Avaiable tokens liquidity: ", round(avaiableLiquidity, 2))
+    print("Total tokens borrowed: ", round(tokenBorrowed, 2))
+    print("Reserve tokens size: ", round(tokenReserve, 2))
+    print("Total tokens borrowed: ", round(avaiableLiquidityUSD, 2))
+    print("Total tokens borrowed: ", round(tokenBorrowedUSD, 2))
+    print("Total tokens borrowed: ", round(tokenReserveUSD, 2))
     print()
 
     i = i + 1
 
-############################################################################################################################################
-#########################################################################  Pool ############################################################
-############################################################################################################################################
-# token = uniAddress
-
-# protocolDataProvider = contractProtocolDataProvider.functions.getReserveConfigurationData(token).call()
-# decimals = protocolDataProvider[0] # the decimals used by the reserve
-# maxLtv = protocolDataProvider[1]/100 # represents the maximum borrowing power of a specific collateral. If a collateral has an LTV of 75%, the user can borrow up to 0.75 worth of ETH in the principal currency for every 1 ETH worth of collateral.
-# liquidationThreshold = protocolDataProvider[2]/100 #  threshold at which a borrow position will be considered undercollateralized and subject to liquidation for each collateral
-# liquidationPenalty = protocolDataProvider[3]/100 - 100 # bonus awarded to liquidators
-# reserveFactor = protocolDataProvider[4]/100 # Reserve factor is a percentage of interest which goes to a collector contract that is controlled by Aave governance to promote ecosystem growth.
-# priceInEth = float(web3.fromWei(contractPriceOracle.functions.getAssetPrice(token).call(), 'ether')) * ethPrice
-# tokenQuantity = contractProtocolDataProvider.functions.getReserveData(token).call()
-# avaiableLiquidity = round(web3.fromWei(tokenQuantity[0]*priceInEth, 'ether'), 2)
-
-# print("Max LTV: ", maxLtv,"%")
-# print("Liquidation threshold: ", liquidationThreshold,"%")
-# print("Liquidation penalty: ", liquidationPenalty,"%")
-# print("Reserve factor: ", reserveFactor, "%")
-# print(priceInEth)
-# print(web3.fromWei(tokenQuantity[0]*priceInEth, 'ether'))
+print("Total Borrows: ", round(totalBorrowedUSD/(10**9), 2), "B")
+print("Total Avaiable: ", round(totalAvaiableLiquidityUSD/(10**9), 2), "B")
+print("Total Market Size: ", round(totalReserveUSD/(10**9), 2), "B")
