@@ -97,7 +97,8 @@ for x in allTokens:
     # Reserve
     tokenReserve = tokenBorrowed + avaiableLiquidity
     tokenReserveUSD = tokenBorrowedUSD + avaiableLiquidityUSD
-    #utilizationRate = tokenBorrow/tokenReserve
+
+    utilizationRate = tokenBorrowedUSD/tokenReserveUSD
 
     totalAvaiableLiquidityUSD = avaiableLiquidityUSD + totalAvaiableLiquidityUSD
     totalBorrowedUSD = tokenBorrowedUSD + totalBorrowedUSD
@@ -111,7 +112,7 @@ for x in allTokens:
     print("Liquidation threshold: ", liquidationThreshold,"%")
     print("Liquidation penalty: ", liquidationPenalty,"%")
     print("Reserve factor: ", reserveFactor, "%")
-    #print("Utilization rate: ", utilizationRate, "%")
+    print("Utilization rate: ", utilizationRate, "%")
     print("Avaiable tokens liquidity: ", round(avaiableLiquidity, 2))
     print("Total tokens borrowed: ", round(tokenBorrowed, 2))
     print("Reserve tokens size: ", round(tokenReserve, 2))
@@ -123,5 +124,5 @@ for x in allTokens:
     i = i + 1
 
 print("Total Borrows: ", round(totalBorrowedUSD/(10**9), 2), "B")
-print("Total Avaiable: ", round(totalAvaiableLiquidityUSD/(10**9), 2), "B")
+print("Total Avaiable (TVL): ", round(totalAvaiableLiquidityUSD/(10**9), 2), "B")
 print("Total Market Size: ", round(totalReserveUSD/(10**9), 2), "B")
