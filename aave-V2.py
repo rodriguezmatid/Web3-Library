@@ -115,9 +115,9 @@ for x in allTokens:
     print("Avaiable tokens liquidity: ", round(avaiableLiquidity, 2))
     print("Total tokens borrowed: ", round(tokenBorrowed, 2))
     print("Reserve tokens size: ", round(tokenReserve, 2))
-    print("Total tokens borrowed: ", round(avaiableLiquidityUSD, 2))
-    print("Total tokens borrowed: ", round(tokenBorrowedUSD, 2))
-    print("Total tokens borrowed: ", round(tokenReserveUSD, 2))
+    print("Total avaiable USD: ", round(avaiableLiquidityUSD, 2))
+    print("Total borrowed USD: ", round(tokenBorrowedUSD, 2))
+    print("Total reserve borrowed USD: ", round(tokenReserveUSD, 2))
     print()
 
     i = i + 1
